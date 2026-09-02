@@ -1,5 +1,5 @@
 homepage: https://cookieofficer.com
 documentation: https://github.com/cookieofficer/gtm-template#readme
 versions:
-- sha: 0000000000000000000000000000000000000000
+- sha: 2ab7bd200905a18193cbaea7f841eae4cbbc767b
   changeNotes: Initial release.
