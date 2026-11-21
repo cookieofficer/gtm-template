@@ -1,6 +1,8 @@
 homepage: https://cookieofficer.com
 documentation: https://github.com/cookieofficer/gtm-template#readme
 versions:
+- sha: f2a6d2edc34ea56cd3f443dda7d45c487c4ae831
+  changeNotes: Sets the CookieOfficer developer ID. wait_for_update is at least 100 ms and is declared in the template permissions. Clearer template description.
 - sha: ac5310ac09cdf7f9540f23c3f5cfd61225d3f513
   changeNotes: Icon resized to 96x96 to match the template style guide.
 - sha: 2ab7bd200905a18193cbaea7f841eae4cbbc767b
