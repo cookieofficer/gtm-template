@@ -19,7 +19,7 @@ ___INFO___
     "id": "github.com_cookieofficer",
     "displayName": "CookieOfficer"
   },
-  "description": "CookieOfficer is a Consent Management Platform (CMP) that helps make your use of cookies and tracking compliant with privacy laws like the GDPR, ePrivacy and CCPA. More on https://cookieofficer.com.",
+  "description": "Loads the CookieOfficer consent banner, sets the Google Consent Mode v2 default state (globally or per region) and updates it with the visitor's choice. Requires a CookieOfficer account.",
   "containerContexts": [
     "WEB"
   ],
@@ -38,7 +38,7 @@ ___TEMPLATE_PARAMETERS___
     "name": "siteId",
     "displayName": "Site ID (data-co-id)",
     "simpleValueType": true,
-    "help": "Log in to your CookieOfficer account, pick the site from the selector at the top of the sidebar, then open \u003cb\u003eInstallation\u003c/b\u003e and find the \u003cb\u003eGoogle Tag Manager\u003c/b\u003e section. Copy the \u003cb\u003eSite ID\u003c/b\u003e from there. It is the same value the standard snippet carries as \u003cb\u003edata-co-id\u003c/b\u003e (e.g. &lt;script src=\"https://cdn.cookieofficer.com/s/\u003cb\u003eyour_site_id\u003c/b\u003e.js\"&gt;). Format: co-XXXXXXXX.",
+    "help": "Log in to your CookieOfficer account, pick the site from the selector at the top of the sidebar, then open \u003cb\u003eInstallation\u003c/b\u003e and find the \u003cb\u003eGoogle Tag Manager\u003c/b\u003e section. Copy the \u003cb\u003eSite ID\u003c/b\u003e from there. It is the same value the standard snippet carries in its \u003cb\u003edata-co-id\u003c/b\u003e attribute. Format: co-XXXXXXXX.",
     "valueHint": "Your CookieOfficer Site ID",
     "notSetText": "This field is required.",
     "valueValidators": [
@@ -366,7 +366,7 @@ ___TEMPLATE_PARAMETERS___
         "simpleValueType": true,
         "defaultValue": 2000,
         "valueUnit": "milliseconds",
-        "help": "How long tags wait for the visitor decision before they measure without cookies. 2000 ms is the recommended value. This field cannot be left empty.",
+        "help": "How long tags wait for the visitor decision before they measure without cookies. 2000 ms is the recommended value. The minimum is 100 ms; lower values are raised to 100 ms. This field cannot be left empty.",
         "valueValidators": [
           {
             "type": "NON_EMPTY"
@@ -419,14 +419,19 @@ const boolOr = function (v, dflt) { return v === undefined ? dflt : v === true; 
 const g = function (v) { return v ? 'granted' : 'denied'; };
 const consentModeEnabled = data.consentModeEnabled !== false;
 
+gtagSet({
+  'developer_id.dZmQwMD': true
+});
+
 if (consentModeEnabled) {
   const wfuRaw = data.waitForUpdate;
-  const wfu = (wfuRaw === undefined || wfuRaw === '') ? 2000 : makeNumber(wfuRaw);
+  const wfuNum = (wfuRaw === undefined || wfuRaw === '') ? 2000 : makeNumber(wfuRaw);
+  const wfu = wfuNum > 0 ? (wfuNum < 100 ? 100 : wfuNum) : 2000;
   const regionSettings = data.regionSettings || [];
   let hasGlobal = false;
 
   const applyDefault = function (cd) {
-    if (wfu > 0) cd.wait_for_update = wfu;
+    cd.wait_for_update = wfu;
     setDefaultConsentState(cd);
   };
 
@@ -765,6 +770,37 @@ ___WEB_PERMISSIONS___
                     "boolean": true
                   }
                 ]
+              },
+              {
+                "type": 3,
+                "mapKey": [
+                  {
+                    "type": 1,
+                    "string": "consentType"
+                  },
+                  {
+                    "type": 1,
+                    "string": "read"
+                  },
+                  {
+                    "type": 1,
+                    "string": "write"
+                  }
+                ],
+                "mapValue": [
+                  {
+                    "type": 1,
+                    "string": "wait_for_update"
+                  },
+                  {
+                    "type": 8,
+                    "boolean": false
+                  },
+                  {
+                    "type": 8,
+                    "boolean": true
+                  }
+                ]
               }
             ]
           }
@@ -856,6 +892,10 @@ ___WEB_PERMISSIONS___
               {
                 "type": 1,
                 "string": "url_passthrough"
+              },
+              {
+                "type": 1,
+                "string": "developer_id.dZmQwMD"
               }
             ]
           }
